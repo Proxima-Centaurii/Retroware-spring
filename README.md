@@ -14,7 +14,17 @@ The version of RETROWARE in this repository uses Maven as a project manager and 
 # H2 Database
 This database was chosen because it is a fast in memory database that requires little to no configuration to be used. This made H2 ideal to demo the RETROWARE web application.
 
+Please note that this database is not persistent, it is initialised on startup with the "schema.sql" and "data.sql" files located in the "resources" folder, and loses its data and any changes made when closing the server. 
+
 The database's console is enabled and can be accessed by accessing "localhost:8080/h2-console". Make sure that the "JDBC URL" form entry contains: "jdbc:h2:mem:retroware-db" (this URL is also printed in the console after running the project). The username is "sa" and no password is set, however the console is accessible only from the host machine as remote access has been disabled from settings.
+
+# Important files and folders
+
+## Dynamic content folder
+In the root of the of the project there must be a folder named "dynamic" with a sub-directory named "user_profile_pictures". In this sub-folder all of the user profile pictures are stored and loaded from. If "dynamic/user_profile_pictures" is missing then the application may throw errors.
+
+## Database "schema" and "data" files
+Each time you run this project, spring uses the "schema.sql" and "data.sql" files located in "resources" folder to initialise the schema then insert data into the database. Any changes to the database are lost when the server is closed.
 
 # List of dependencies used
 1. Spring Web
