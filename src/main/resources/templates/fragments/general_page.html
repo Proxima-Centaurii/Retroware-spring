@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head th:fragment="pageHead">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="UTF-8"/>
+        <title th:text="#{app.name}"></title>
+    </head>
+
+    <body th:fragment="pageBody(content)">
+        <img id="bgImage" th:src="@{/media/website_default/bgImage.jpg}" />
+
+        <!--NAVIGATION BAR-->
+        <div class="main-nav">
+            <nav>
+                <!--Centering container-->
+                <div class="center-horizontal" style="width: 78%;">
+                    <!--LEFT SIDE of navigation bar (SEARCH BAR)-->
+                    <form class="search-bar" style="float:left; width: 60%" method="GET" th:action="@{/search}">
+                        <input type="text" minlength="1" maxlength="30" placeholder="Search games..." autocomplete="off" th:name="s" th:value="${param.s != null ? param.s : ''}"/>
+                        <label>
+                            <input type="submit"/>
+                            <div class="highlightBtn search-button">
+                                <!--Search icon-->
+                                <th:block th:replace="~{fragments/svg :: search}"></th:block>
+                            </div>
+                        </label>
+                    </form>
+        
+                    <!--RIGHT SIDE of navigation bar (NAVIGATION BUTTONS)-->
+                    <div style="float: right; width: 40%;">
+                        <div style="float: right; margin: 8px 0px 0px 5px;">
+                            
+                            <div class="highlightBtn buttonLink" onclick="showModal('categories-modal')">
+                                <p>Categories</p>
+                                <th:block th:replace="~{fragments/svg :: grid-1x2-fill}"></th:block>
+                            </div>
+                            
+                            <!--Navbar buttons if not authenticated-->
+                            <div style="display: inline-block;" sec:authorize="! isAuthenticated()">
+                                <a class="highlightBtn buttonLink" th:href="@{/login}">
+                                    <p>Log in</p>
+                                    <th:block th:replace="~{fragments/svg :: pencil-square(class='minimal-icon')}"></th:block>
+                                </a>
+                                <a class="highlightBtn buttonLink" th:href="@{/register}">
+                                    <p>Register</p>
+                                    <th:block th:replace="~{fragments/svg :: box-arrow-in}"></th:block>
+                                </a>
+                            </div>
+                            
+                            <!--Navbar buttons if authenticated-->
+                            <div style="display: inline-block;" sec:authorize="isAuthenticated()">
+                                <a class="highlightBtn buttonLink" th:href="@{/logout}">
+                                    <p>Log out</p>
+                                    <th:block th:replace="~{fragments/svg :: box-arrow-out}"></th:block>
+                                </a>
+                                <a style="margin-left: 5px;" th:href="@{/profile}">
+                                    <img class="profile-picture" th:src="@{/profile_picture}"/>
+                                </a>
+                            </div>
+                            
+                        </div>
+                    </div>
+        
+                </div>
+            </nav>
+        </div>
+
+        <!--MAIN CONTENT-->
+        <div class="main">
+            <!--Categories modal-->
+            <div id="categories-modal" class="modal-background modal">
+                <div class="content modal-content-categories">
+                    <p style="margin-bottom: 10px;">Categories</p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px">
+                        <a class="highlightBtn buttonLink" th:each="entry: ${category_map}" th:text="${entry.value.title}" th:href="@{/category(c=${entry.key})}"></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IN-PAGE TITLE -->
+            <a th:href="@{/home}">
+                <h1 id="title" th:text="#{app.name}"></h1>
+            </a>
+
+            <th:block th:if="${content == null ? false : true}" th:insert="~{${content} :: contentBody}"></th:block>
+        </div>
+
+        <footer>
+            <p class="center-horizontal"><a class="center-horizontal" href="license">Click here to view license</a></p>
+            <p class="center-horizontal">"Monoton" font - Copyright (c) 2021, Vernon Adams (<a href="www.sansoxygen.com">www.sansoxygen.com</a>).</p>
+            <p class="center-horizontal">"Rubik" font - Copyright (c) 2021, Meir Sadan (<a href="www.meirsadan.com">www.meirsadan.com</a>), Hubert and Fischer, Cyreal.</p>
+            <div class="center-horizontal">
+                <img class="human-readable" th:src="@{/media/website_default/ofl-human-readable.png}">
+            </div>
+        </footer>
+
+        <script type="text/javascript" th:src="@{/scripts/page_content_utils.js}"></script>
+    </body>
+</html>

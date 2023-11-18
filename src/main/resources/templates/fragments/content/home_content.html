@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <!--CONTENT -->
+	<div th:fragment="contentBody">
+
+    	<!-- The main body of the page -->
+    	<div class="center-horizontal multipane-flex" style="width: 100%;">
+
+        	<!--FEATURED PANE -->
+        	<div class="content pane">
+            	<h2 class="center-horizontal">Featured</h2>
+            	<ul class="center-horizontal game-list" style="justify-content: center;">
+                	<th:block th:replace="~{fragments/game_list :: content(game_list=${featured_games})}"></th:block>
+            	</ul>
+        	</div>
+
+        	<!--MOST PLAYED PANE-->
+        	<div class="content pane">
+        	    <h2 class="center-horizontal">Most played</h2>
+        	    <ul class="center-horizontal game-list" style="justify-content: center;">
+					<th:block th:replace="~{fragments/game_list :: content(game_list=${popular_games})}"></th:block>
+        	    </ul>
+        	</div>
+
+        	<!--ALL GAMES PANE-->
+        	<div class="content pane" style="flex-basis: 100%;">
+            	<h2 class="center-horizontal">All games</h2>
+            	<ul class="center-horizontal game-list" style="width: 100%;">
+                	<th:block th:replace="~{fragments/game_list :: content(game_list=${all_games})}"></th:block>
+            	</ul>
+        	</div>
+    	</div>
+	</div>
+</html>

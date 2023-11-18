@@ -1,0 +1,17 @@
+<!--CONTENT-->
+<div th:fragment="contentBody">
+
+    <div class="center-horizontal content" style="padding: 5px; width: fit-content;">
+        <form name="f" th:action="@{/login}" method="POST" autocomplete="off">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" />
+        
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password">
+            
+            <input class="highlightBtn" type="submit" value="Log in">
+        </form>
+        <p class="center-horizontal errMsg" th:if="${login_fail}">Wrong username or password.</p>
+        <p class="center-horizontal small">Don't have an account? <a href="" style="color: #f07aff;">Sign up!</a></p>
+    </div>
+</div>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://wwww.thymeleaf.org">
+
+<head>
+	<th:block th:insert="~{fragments/general_page.html :: pageHead}"></th:block>
+
+	<link rel="stylesheet" th:href="@{/styles/general.css}">
+</head>
+
+<body>
+	<img id="bgImage" th:src="@{/media/website_default/error_background.jpg}" />
+
+	<div class="main">
+		<div id="main" style="position: fixed; top: 50%; left: 50%; width: fit-content; transform: translate(-50%, -80%);">
+            <h1 class="error-title" th:text="${error_title}">Error title</h1>
+
+            <div class="content">
+                <p class="center-horizontal" th:text="${error_message}">An error happened...</p>
+            </div>
+
+           <div class="center-horizontal">
+                <a class="highlightBtn buttonLink" href="/home">Go back home</a>
+           </div>
+      </div>
+	</div>
+</body>
+
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <!--MAIN CONTENT -->
+    <div th:fragment="contentBody">
+        <meta name="_csrf" th:content="${_csrf.token}"/>
+
+        <div class="center-horizontal" style="width: 80%;">
+
+            <!--CATEGORY DESCRIPTION-->
+            <div class="content pane description-pane">
+                <h2 class="center-horizontal" th:text="${current_category.title}"></h2>
+                <p th:text="${current_category.description}"></p>
+            </div>
+        
+            <!--RESULTS PANE-->
+            <div class="content pane">
+                <h2 class="center-horizontal">Games</h2>
+
+                <div style="display: inline-flex;padding-left:10px;gap: 5px;">
+                    <p>Sort by:</p>
+                    <select style="width:fit-content; flex: 1 1 auto;" th:name="sort" onchange="updateList(this)">
+                        <option th:each="entry: ${sorting_options}" th:text="${entry.display_name}" th:value="${entry.ordinal()}"></option>
+                    </select>
+                </div>
+                
+                <ul id="game_list" class="center-horizontal game-list" style="justify-content: center;">
+                    <th:block th:replace="~{fragments/game_list :: content}"></th:block>
+                </ul>
+
+            </div>
+        </div>
+
+        <script>
+            
+            const urlParams = new URLSearchParams(window.location.search);
+
+            function updateList(select_element){
+                let token = document.querySelector("meta[name='_csrf']").content;
+
+                let sorting = parseInt(select_element.selectedOptions[0].value);
+                sorting = (Number.isNaN(sorting)) ? 0 : sorting; 
+
+                let data = {c: urlParams.get("c"), sort: sorting};
+
+                fetch('/search_games',{ 
+ 	                method: "POST",
+                    mode: "same-origin",
+                    credentials: "same-origin",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN" : token
+                    },
+                    redirect: "manual",
+                    body: JSON.stringify(data)				
+                }).then( function (response){
+                    return response.text();
+                }).then(function (html) {
+                    document.getElementById("game_list").innerHTML = html;
+  					
+                    if(typeof fetchedNewContent !== "undefined")
+                        fetchedNewContent();
+                }).catch(function (err){
+                    console.warn('Could not update list.', err);
+                });
+            }
+
+        </script>
+
+    </div>
+</html>

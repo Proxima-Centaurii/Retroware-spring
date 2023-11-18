@@ -1,0 +1,149 @@
+<div th:fragment="contentBody">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+
+    <!--ACCOUNT SETTINGS MODAL-->
+    <div id="account-settings-modal" class="modal-background modal" style="background-color: rgba(0,0,0,0.75);" th:if="profile_owner" sec:authorize="isAuthenticated()">
+        <div class="content modal-content-account-settings">
+            <span class="close-modal" onclick="closeModal('account-settings-modal')">&times;</span>
+            <h2 class="center-horizontal">Account settings</h2>
+            <form method="GET" th:action="@{/user/delete_user}" style="width: fit-content;">
+                <input type="submit" class="highlightBtn" value="Delete account"/>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            </form>
+        </div>
+    </div>
+
+    <!--UPLOAD PROFILE PICTURE MODAL-->
+    <div id="profile-picture-modal" class="modal-background modal" style="background-color: rgba(0,0,0,0.75);" th:if="profile_owner" sec:authorize="isAuthenticated()">
+        <div class="content modal-content-profile-picture">
+            <span class="close-modal" onclick="closeModal('profile-picture-modal')">&times;</span>
+            <h2 class="center-horizontal">Change profile picture</h2>
+            <div class="center-horizontal" method="POST" enctype="multipart/form-data" action="#"></form>
+                <p>You can only upload 'jpg' and 'png' files.</p>
+                <p id="profile-picture-error" class="errMsg" style="display: none;">The selected file could not be uploaded.</p>
+                <input type="file" name="file" accept="image/jpeg, image/png" style="margin-bottom: 5px;margin-top: 15px;" />
+                <button class="highlightBtn" onclick="uploadProfilePicture()" style="width: 100%;">Submit image</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- USER HEADER -->
+	<div class="center-horizontal content">
+        <div class="user-header" style="display: flex;padding: 5px;">
+            <!--PROFILE PICTURE-->
+            <div style="width: 128px;margin-right: 5px;">
+                <img class="profile-picture" th:src="@{/profile_picture/{u}(u=${profile.getUsername()})}"/>
+
+                <!--EDIT PROFILE PICTURE ICON-->
+                <button class="highlightBtn buttonLink" style="width: 100%;margin-bottom: 8px;" onclick="showModal('profile-picture-modal')" th:if="${profile_owner}" sec:authorize="isAuthenticated()">
+                    <th:block th:replace="~{fragments/svg :: camera}"></th:block>
+                    <p class="small">Edit picture</p>
+                </button>
+            </div>
+
+            <!--USER DETAILS (username, description, join date)-->
+            <div style="width: 100%;">
+                <div class="inline-text">
+                        <p th:text="${profile.getUsername()}"></p>
+                        <!--SETTINGS ICON-->
+                        <th:block th:replace="~{fragments/svg :: gear}" th:if="${profile_owner}" sec:authorize="isAuthenticated()"></th:block>
+                    <span style="color: salmon;" th:text="| - Joined on: ${profile.getJoin_date()}|"> - Joined on : 01/01/2022</span>
+                </div>
+                <textarea id="description-textbox" class="user-comment" maxlength="200" placeholder="About you." style="height: 95px;" th:text="${profile.getDescription()}" readonly></textarea>
+                <button class="highlightBtn buttonLink" onclick="editDescription(this,'description-textbox')" th:if="${profile_owner}" sec:authorize="isAuthenticated()">
+                    <th:block th:replace="~{fragments/svg :: pencil-square}"></th:block>
+                    <p class="small">Edit description</p>
+                </button>
+            </div>
+        </div>
+	</div>
+
+    <!--LIKED GAMES PANEL-->
+	<div class="center-horizontal content">
+        <h2 class="center-horizontal">Liked games</h2>
+
+		<ul class="center-horizontal game-list" style="justify-content: center;">
+            <th:block th:replace="~{fragments/game_list :: content}"></th:block>
+        </ul>
+	</div>
+
+    <script type="text/javascript" th:if="${profile_owner}" sec:authorize="isAuthenticated()">
+        
+        function editDescription(button, id){
+            let tb = document.getElementById(id);
+            
+            if(tb.hasAttribute('readonly')){
+                tb.removeAttribute('readonly');
+                button.children[1].textContent = 'Submit';
+                return;
+            }
+            
+            let description_text = tb.value;
+
+            if(description_text.length > tb.maxLength)
+                return;
+
+            tb.setAttribute('readonly','');
+            button.children[1].textContent = 'Edit description';
+
+            let token = document.querySelector("meta[name='_csrf']").content;
+            
+            fetch('/user/update_description',{ 
+ 	                method: "POST",
+                    mode: "same-origin",
+                    credentials: "same-origin",
+                    headers: {
+                        "Content-Type": 'application/text',
+                        "X-CSRF-TOKEN" : token
+                    },
+                    redirect: "error",
+                    body: description_text			
+                }).then( function (response){
+                    if(!response.ok){
+						location.reload();
+						return;
+					}                   
+                    return response.text();
+                }).then(function (response) {
+                    console.log(response);
+                }).catch(function (err){
+                    console.warn('Could not update description.', err);
+                });
+
+        }
+
+        function uploadProfilePicture(){
+            let fileInput = document.querySelector("input[name='file']"); 
+            let formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            fileInput.value = null;
+
+            let token = document.querySelector("meta[name='_csrf']").content;
+            fetch('/user/upload_profile_picture',{ 
+ 	                method: "POST",
+                    mode: "same-origin",
+                    credentials: "same-origin",
+                    headers: {
+                        "X-CSRF-TOKEN" : token
+                    },
+                    redirect: "error",
+                    body: formData			
+                }).then( function (response){
+                    if(!response.ok){
+                        document.getElementById('profile-picture-error').style.display = "block";
+                    }
+                    else
+                        location.reload();
+                    
+                    return response.text();
+                }).then(function (response) {
+                    console.log(response);
+                }).catch(function (err){
+                    console.warn('Could not update description.', err);
+                });
+        }
+    </script>
+
+</div>

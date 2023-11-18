@@ -1,0 +1,15 @@
+<th:block th:fragment="content">
+	<li th:if="${#lists.isEmpty(game_list)}">
+		<p>No games found... :(</p>
+	</li>
+	<li th:unless="${#lists.isEmpty(game_list)}" th:each="game: ${game_list}">
+		<a class="highlightBtn" th:href="@{/game(id=${game.game_id})}" onpointerenter="startTitleSlide(this)" onpointerleave="stopTitleSlide(this)">
+			<img th:src="|/media/game_thumbnails/${game.resource_name}.png|">
+			<div style="overflow:hidden">
+				<p class="center-horizontal game-title" th:text="${game.title}"></p>
+			</div>
+			<p class="description center-horizontal">Rating: <span class="game-rating-label" th:value="${game.rating}"/></p>
+			<p class="description center-horizontal"><span class="user-count" th:value="${game.play_count}"></span> plays</p>
+		</a>
+	</li>
+</th:block>

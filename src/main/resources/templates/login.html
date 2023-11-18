@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<th:block th:insert="~{fragments/general_page.html :: pageHead}"></th:block>
+
+	<link rel="stylesheet" th:href="@{/styles/general.css}">
+</head>
+
+<body>
+	<img id="bgImage" th:src="@{/media/website_default/bgImage.jpg}">
+
+	<!--MAIN CONTENT-->
+	<div class="main">
+		<!--Categories modal-->
+		<div id="categories-modal" class="modal-background modal">
+			<div class="content modal-content-categories">
+				<p style="margin-bottom: 10px;">Categories</p>
+				<div style="display: flex; flex-wrap: wrap; gap: 10px">
+					<a class="highlightBtn buttonLink" th:each="entry: ${category_map}" th:text="${entry.value.title}" th:href="@{/category(c=${entry.key})}"></a>
+				</div>
+			</div>
+		</div>
+
+		<a th:href="@{/home}">
+			<h1 id="title" th:text="#{app.name}"></h1>
+		</a>
+
+		<div class="center-horizontal content" style="padding: 5px; width: 300px;">
+			<form name="f" th:action="@{/login}" method="POST" autocomplete="off">
+				<label for="username">Username</label>
+				<input type="text" id="username" name="username" />
+			
+				<label for="password">Password</label>
+				<input type="password" id="password" name="password">
+				
+				<input class="highlightBtn" type="submit" value="Log in">
+			</form>
+			<p class="center-horizontal errMsg" th:if="${login_fail}">Wrong username or password.</p>
+			<p class="center-horizontal small">Don't have an account? <a th:href="@{/register}" style="color: #f07aff;">Register now!</a></p>
+		</div>
+	</div>
+
+</body>
+
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<th:block th:insert="~{fragments/general_page.html :: pageHead}"></th:block>
+
+	<link rel="stylesheet" th:href="@{/styles/general.css}">
+</head>
+
+<body>
+	<img id="bgImage" th:src="@{/media/website_default/bgImage.jpg}">
+
+	<!--MAIN CONTENT-->
+	<div class="main">
+		<!--Categories modal-->
+		<div id="categories-modal" class="modal-background modal">
+			<div class="content modal-content-categories">
+				<p style="margin-bottom: 10px;">Categories</p>
+				<div style="display: flex; flex-wrap: wrap; gap: 10px">
+					<a class="highlightBtn buttonLink" th:each="entry: ${category_map}" th:text="${entry.value.title}" th:href="@{/category(c=${entry.key})}"></a>
+				</div>
+			</div>
+		</div>
+
+		<a th:href="@{/home}">
+			<h1 id="title" th:text="#{app.name}"></h1>
+		</a>
+
+		<div class="center-horizontal content" style="padding: 5px; width: 300px;">
+			<form autocomplete="off"  th:action="@{/register}" method="POST">    
+                <label>Username</label>
+                <input type="text" name="username" onfocusin="showPrompt(0)">
+                <div id="username-prompt" style="display: none;">
+                    <p class="small">The username must:</p>
+                    <ul>
+                        <li>be between 1 and 25 characters long</li>
+                        <li>contain only letters,numbers and any of the special characters: <big><span style="color: darkorange;">.  _ - </span></big></li>
+                        <li>not contain any special character more than 1 time in a row</li>
+                    </ul>
+                </div>
+            
+                <label>Password</label>
+                <input type="password" name="password" onfocusin="showPrompt(1)" onkeyup="calculatePasswordStrength(this.value)">
+                <p id="password-strength" class="small" style="display: none;">Strength: <span id="password-strength-value"></span></p>
+		        <div id="password-prompt" style="display: none;">
+                    <p class="small">The password must:</p>
+                    <ul>
+                        <li>be at least 5 characters long but no longer than 50 characters</li>
+                        <li>not be <span style="color: orangered;">very weak</span></li>
+                    </ul>
+                </div>
+
+                <label>Confirm password</label>
+                <input type="password" name="confirm_password" onfocusin="showPrompt(-1)">
+                
+                <p class="center-horizontal errMsg" th:if="${fail_message != null}" th:text="${fail_message}">Error message from server</p>
+                
+                <input class="highlightBtn" type="submit" name="register" value="Register">
+            </form>
+		</div>
+	</div>
+
+    <script type="text/javascript" th:src="@{/scripts/signup.js}"></script>
+</body>
+
+</html>

@@ -1,0 +1,16 @@
+<li th:fragment="entry">
+    <img class="profile-picture" th:src="@{/profile_picture}"/>
+    <div>
+        <div class="inline-text">
+            <a th:href="@{/profile(u=${username})}">
+                <p class="user-name" th:text="${username}"></p>
+            </a>
+            <p class="comment-timestamp" th:text="|Posted on: ${#dates.format(time_stamp, 'dd MMM yyyy')}|"></p>
+            <div class="icon-button" style="width: fit-content;" onclick="deleteComment(this)">
+                <meta class="posted_timestamp" th:content="${time_stamp.toString()}"/>
+                <th:block th:replace="~{fragments/svg :: trash-can}"></th:block>
+            </div>
+        </div>
+        <p class="small" th:text="${comment}"></p>
+    </div>
+</li>

@@ -1,0 +1,239 @@
+<div th:fragment="contentBody">
+	<meta name="_csrf" th:content="${_csrf.token}"/>
+	<meta name="user_rating" th:content="${user_rating}"/>
+
+    <!-- Main content -->
+	<div class="center-horizontal content game-container">
+
+		<iframe type="text/html" th:src="@{/games/{game_folder}/game.html(game_folder=${game.resource_name})}" width="640" height="420" scrolling="no" style="border: 0px; border-radius: 10px 10px 0px 0px;"></iframe>
+		<div class="game-footer">
+			<h2 class="game-title" th:text="${game.title}">GAME TITLE</h2>
+			<div style="flex: 1 1 auto;">
+				<p class="small">Rating: <span class="game-rating-label" th:value="${game.rating}"/></p>
+				<p class="small">Plays: <span class="user-count" th:value="${game.play_count}"/></p>
+				<p class="small" th:text="|Published: ${#dates.format(game.publish_date, 'dd MMM yyyy')}|">Published: 01 Jan 2000</p>
+			</div>
+
+			<div style="flex: 1 1 auto;">
+				<div style="float: right;">
+					<p style="float: right;">Do you like this game?</p>
+					<div class="center-horizontal rating-input-panel">
+						<!--Rating controls if user is authenticated-->
+						<div sec:authorize="isAuthenticated()">
+							<button name="like" class="highlightBtn buttonLink tooltip" th:classappend="${user_rating != null and user_rating > 0 ? 'liked' : ''}" onclick="rateGame(this, 1)">
+								<p><span class="user-count" th:value="${rating.getLikes()}"/></p>
+								<th:block th:replace="~{fragments/svg :: thumbs-up}"></th:block>
+								<p class="tooltip-text">I like this game.</p>
+							</button>
+							<button name="dislike" class="highlightBtn buttonLink dislikeButton tooltip" th:classappend="${user_rating != null and user_rating < 0 ? 'disliked' : ''}" onclick="rateGame(this, -1)">
+								<p><span class="user-count" th:value="${rating.getDislikes()}"/></p>
+								<th:block th:replace="~{fragments/svg :: thumbs-down}"></th:block>
+								<p class="tooltip-text">I dislike this game.</p>
+							</button>
+						</div>
+						<!--Rating controls if user is not authenticated-->
+						<div sec:authorize="isAnonymous()">
+							<a class="highlightBtn buttonLink tooltip" th:href="@{/login}">
+								<p><span class="user-count" th:value="${rating.getLikes()}"/></p>
+								<th:block th:replace="~{fragments/svg :: thumbs-up}"></th:block>
+								<p class="tooltip-text">I like this game.</p>
+							</a>
+							<a class="highlightBtn buttonLink dislikeButton tooltip" th:href="@{/login}">
+								<p><span class="user-count" th:value="${rating.getDislikes()}"/></p>
+								<th:block th:replace="~{fragments/svg :: thumbs-down}"></th:block>
+								<p class="tooltip-text">I dislike this game.</p>
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+    <!--GAME DESCRIPTION-->
+	<div class="center-horizontal content description-pane">
+		<h2 class="center-horizontal">Description</h2>
+		<p class="center-horizontal" th:text="${game.description}"></p>
+	</div>
+
+    <!--COMMENT SECTION-->
+	<div class="center-horizontal content">
+		<h2 class="center-horizontal">Comments</h2>
+
+		<!--USER COMMENT INPUT-->
+		<div class="comment-input" sec:authorize="isAuthenticated()">
+				<img class="profile-picture" th:src="@{/profile_picture}"/>
+				<div>
+					<p class="user-name" th:text="${principal_name}">You</p>
+					<textarea name="comment-textarea" class="user-comment" placeholder="Your comment here..." maxlength="150"></textarea>
+					<button class="highlightBtn" onclick="addComment()">Post</button>
+				</div>
+		</div>
+
+		<div class="comment-input" sec:authorize="isAnonymous()">
+			<img class="profile-picture" th:src="@{/media/website_default/default_profile.jpg}"/>
+			<div>
+				<p class="user-name">You</p>
+				<textarea class="user-comment" placeholder="Log in to comment" maxlength="150" readonly></textarea>
+				<a class="highlightBtn buttonLink" th:href="@{/login}">Post</a>
+			</div>
+		</div>
+
+		<!--Display user comments-->
+		<ul id="comments_list" class="comment-list">
+			<li id="no-comments-message" class="center-horizontal" th:if="${comments_list == null OR #lists.isEmpty(comments_list)}">
+				<div>
+					<p>No comments yet. You can be the first to comment!</p>
+				</div>
+			</li>
+			<li th:id="${comment.posted_on.toString()}" th:each="comment: ${comments_list}">
+				<img class="profile-picture" th:src="@{/profile_picture/{user}(user=${comment.username})}"/>
+				<div>
+					<div class="inline-text">
+						<a th:href="@{/profile(u=${comment.username})}">
+							<p class="user-name" th:text="${comment.username}"></p>
+						</a>
+						<p class="comment-timestamp" th:text="|Posted on: ${#dates.format(comment.posted_on, 'dd MMM yyyy')}|"></p>
+						<div class="icon-button" style="width: fit-content;" th:if="${principal_name == comment.username}" onclick="deleteComment(this)">
+							<meta class="posted_timestamp" th:content="${comment.posted_on.toString()}"/>
+							<th:block th:replace="~{fragments/svg :: trash-can}"></th:block>
+						</div>
+					</div>
+					<p class="small" th:text="${comment.comment}"></p>
+				</div>
+			</li>
+		</ul>
+
+	</div>
+
+	<script type="text/javascript" sec:authorize="isAuthenticated()">
+
+		const urlParams = new URLSearchParams(window.location.search);
+
+		function rateGame(button, rating){
+			let user_rating = parseInt(document.querySelector("meta[name='user_rating']").content);
+			rating = parseInt(rating);
+
+			let reseting = (rating == user_rating);	
+			let new_rating = reseting ? 0 : rating;
+		
+			let data = {id: parseInt(urlParams.get("id")), r: new_rating};
+
+			let token = document.querySelector("meta[name='_csrf']").content;
+			fetch('/user/rate_game',{ 
+ 	                method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN" : token
+                    },
+                    redirect: "error",
+                    body: JSON.stringify(data)			
+                }).then( function (response){
+					if(!response.ok){
+						location.reload();
+						return;
+					}
+                    return response.text();
+                }).then(function (response) {
+                    console.log(response);
+					
+					document.querySelector("meta[name='user_rating']").content = new_rating;
+
+					let button_like = document.querySelector("button[name='like']");
+					let button_dislike = document.querySelector("button[name='dislike']");
+					
+					if(new_rating == 1){
+						button_like.classList.add("liked");
+						button_dislike.classList.remove("disliked");
+					}
+					else if(new_rating == -1){
+						button_like.classList.remove("liked");
+						button_dislike.classList.add("disliked");
+					}
+					else{
+                		button_like.classList.remove("liked");
+                		button_dislike.classList.remove("disliked");
+            		}
+					
+                }).catch(function (err){
+                    console.warn('Could not update description.', err);
+                });
+		}
+
+		function addComment(){
+			let textarea = document.querySelector("textarea[name='comment-textarea']");
+			let comment_content = textarea.value;
+
+			if(comment_content.length < textarea.minLength) 
+				return;
+
+			if(comment_content.length > textarea.maxLength){
+				location.reload();
+			}
+
+			let data = {id: parseInt(urlParams.get("id")), comment: comment_content};
+			let token = document.querySelector("meta[name='_csrf']").content;
+			fetch('/user/add_comment',{ 
+ 	                method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN" : token
+                    },
+					redirect: "manual",
+                    body: JSON.stringify(data)			
+                }).then( function (response){
+					if(!response.ok){
+						location.reload();
+						return;
+					}
+                    return response.text();
+                }).then(function (response) {
+                    console.log(response);
+					
+					document.querySelector("ul[id='comments_list']").insertAdjacentHTML('afterbegin',response);
+					textarea.value = "";
+
+					let no_comments_message = document.querySelector("li[id='no-comments-message']");
+					if(no_comments_message != null)
+						no_comments_message.remove();
+                }).catch(function (err){
+                    console.warn('Could not update description.', err);
+                });
+		}
+
+		function deleteComment(button){
+			let tstamp = button.children[0].content;
+
+			let data = {id: parseInt(urlParams.get("id")), timestamp: tstamp};
+			let token = document.querySelector("meta[name='_csrf']").content;
+			fetch('/user/delete_comment',{ 
+ 	                method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN" : token
+                    },
+					redirect: "error",
+                    body: JSON.stringify(data)			
+                }).then( function (response){
+					if(!response.ok){
+						location.reload();
+						return;
+					}
+                    return response.text();
+                }).then(function (response) {
+                    console.log(response);
+					
+					var label = document.createElement('label');
+					label.innerHTML = "<p class='small'>Deleted!</p>";
+
+					button.replaceWith(label);
+					// button.attributes.onclick.value = "";
+					// button.innerHTML = "Deleted!";
+                }).catch(function (err){
+                    console.warn('Could not update description.', err);
+                });
+		}
+
+	</script>
+</div>

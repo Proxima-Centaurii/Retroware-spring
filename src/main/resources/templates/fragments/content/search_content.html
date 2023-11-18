@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <div th:fragment="contentBody">
+        <div class="center-horizontal" style="width: 80%;">
+            <meta name="_csrf" th:content="${_csrf.token}"/>
+        
+            <!--SEARCH CONTROLS-->
+            <div class="content pane">
+                
+                <div class="search-controls">
+                    <div class="search-bar" style="margin: 10px;">
+                        <input type="text" minlength="1" maxlength="30" placeholder="Search games..." autocomplete="off" th:name="s2" th:value="${search_string != null ? search_string : ''}"/>
+                        <div class="highlightBtn search-button" onclick="updateList()">
+                            <th:block th:replace="~{fragments/svg :: search}"></th:block>
+                        </div>
+                    </div>
+                    <div style="margin: 10px; display: flex; flex-wrap: wrap; gap: 5px;">
+                        <p style="width: 100%; flex: 1 1 auto;">Search options:</p>
+                        <select style="width:fit-content; flex: 1 1 auto;" th:name="c">
+                            <option th:selected="${selected_category == 'ALL_GAMES'}" value="ALL_GAMES">All games</option>
+                            <option th:each="entry: ${category_map}" th:text="${entry.value.title}" th:value="${entry.key}" th:selected="${selected_category == entry.key}"></option>
+                        </select>
+                        <select style="width:fit-content; flex: 1 1 auto;" th:name="sort">
+                            <option th:each="entry: ${sorting_options}" th:text="${entry.display_name}" th:value="${entry.ordinal()}" th:selected="${selected_sorting_option == entry.ordinal()}"></option>
+                        </select>
+                    </div>
+                </div>
+                
+            </div>
+        
+            <!--RESULTS-->
+            <div class="content pane">
+                <h2 class="center-horizontal">Results</h2>
+                
+                <ul id="game_list" class="center-horizontal game-list" style="justify-content: center;">
+                    <th:block th:replace="~{fragments/game_list :: content}"></th:block>
+                </ul>
+            </div>
+    
+    
+        </div> <!-- END of main body-->
+
+        <script>
+
+            function updateList(){
+                let token = document.querySelector("meta[name='_csrf']").content;
+
+                let sorting = parseInt(document.querySelector("select[name='sort']").value);
+                sorting = (Number.isNaN(sorting)) ? 0 : sorting; 
+
+                let search_box = document.querySelector("input[name='s2']");
+                let search_text = search_box.value; 
+                
+                if(search_text.length < search_box.minLength) 
+                    return;
+                if(search_text.length > search_box.maxLength){
+                    location.reload();
+                    return;
+                }
+
+                let data = {s: search_text, c: document.querySelector("select[name='c']").value, sort: sorting};
+
+                fetch('/search_games',{ 
+ 	                method: "POST",
+                    mode: "same-origin",
+                    credentials: "same-origin",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN" : token
+                    },
+                    redirect: "manual",
+                    body: JSON.stringify(data)				
+                }).then( function (response){
+                    return response.text();
+                }).then(function (html) {
+                    console.log(html);
+                    document.getElementById("game_list").innerHTML = html;
+                    
+                    if(typeof fetchedNewContent !== "undefined")
+                        fetchedNewContent();
+                    else
+                        console.log('Could not execute function "fetchedNewContent". No such function.');
+                    
+                }).catch(function (err){
+                    console.warn('Could not update list.', err);
+                });
+            }
+
+        </script>
+
+    </div>
+</html>

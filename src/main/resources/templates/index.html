@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://wwww.thymeleaf.org">
+
+<head>
+	<th:block th:insert="~{fragments/general_page.html :: pageHead}"></th:block>
+
+	<link rel="stylesheet" th:href="@{/styles/general.css}">
+	<link rel="stylesheet" th:href="@{/styles/animations.css}">
+</head>
+
+<body>
+	<!--BACKGROUND VIDEO-->
+	<video autoplay muted loop id="bgVideo">
+		<source th:src="@{/media/website_default/bgvideo.mp4}" type="video/mp4">
+	</video>
+	
+	<div class="main">
+		<div id="main" style="position: fixed; top: 50%; left: 50%; width: fit-content; transform: translate(-50%, -80%);">
+  			<h1 class="text-glow" th:text="#{app.name}"></h1>
+  
+  			<div class="content">
+				<p class="center-horizontal">Welcome!</p>
+				<p class="center-horizontal">Enter and enjoy games that will bring back good memories!</p>
+  			</div>
+  
+ 			<div id="enterBtn" class="center-horizontal">
+				<a class="highlightBtn buttonLink" href="/home">Enter</a>
+ 			</div>
+		</div>
+	</div>
+</body>
+
+</html>

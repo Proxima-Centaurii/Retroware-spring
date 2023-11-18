@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <th:block th:insert="~{fragments/general_page.html :: pageHead}"></th:block>
+
+        <link rel="stylesheet" th:href="@{/styles/general.css}">
+	    <link rel="stylesheet" th:href="@{/styles/lists.css}">
+	    <link rel="stylesheet" th:href="@{/styles/animations.css}">
+    </head>
+    <body>
+        <th:block th:insert="~{fragments/general_page :: pageBody(content='fragments/content/user_profile_content.html')}"></th:block>
+    </body>
+</html>

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<th:block th:insert="~{fragments/general_page.html :: pageHead}"></th:block>
+
+	<link rel="stylesheet" th:href="@{/styles/general.css}">
+</head>
+
+<body>
+	<th:block th:insert="~{fragments/general_page :: pageBody(content='fragments/content/license_content.html')}"></th:block>
+</body>
+
+</html>
